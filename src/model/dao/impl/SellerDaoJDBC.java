@@ -12,29 +12,30 @@ import model.dao.SellerDao;
 import model.entities.Seller;
 import model.entities.department;
 
-public class SellerDaoJDBC implements SellerDao{
-	
+public class SellerDaoJDBC implements SellerDao {
+
 	private Connection conn;
+
 	public SellerDaoJDBC(Connection conn) {
 		this.conn = conn;
 	}
-	
+
 	@Override
 	public void insert(Seller obj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void updade(Seller obj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteById(Integer id) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -42,37 +43,46 @@ public class SellerDaoJDBC implements SellerDao{
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = conn.prepareStatement("SELECT seller.*,department.Name as DepName "
-					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id "
-					+ "WHERE seller.Id = ?");
+			st = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName " + "FROM seller INNER JOIN department "
+							+ "ON seller.DepartmentId = department.Id " + "WHERE seller.Id = ?");
 			st.setInt(1, id);
 			rs = st.executeQuery();
-			if(rs.next()) {
-				department dep = new department();
-				dep.setId(rs.getInt("DepartmentId"));
-				dep.setName(rs.getString("DepName"));
-				Seller obj = new Seller();
-				obj.setId(rs.getInt("Id"));
-				obj.setName(rs.getString("Name"));
-				obj.setEmail(rs.getString("Email"));
-				obj.setBaseSalary(rs.getDouble("BaseSalary"));
-				obj.setBirthDate(rs.getDate("BirthDate"));
-				obj.setDepartment(dep);
-				obj.setDepartment(dep);
+			if (rs.next()) {
+				department dep = instantiateDepartment(rs);
+				Seller obj = instantiateSeller(rs, dep);
 				return obj;
 			}
+
 			return null;
-		}catch(SQLException e) {
+
+		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-		}finally{
+
+		} finally {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
-		
-		
-		
-		
+
+	}
+
+	private Seller instantiateSeller(ResultSet rs, department dep) throws SQLException {
+		Seller obj = new Seller();
+		obj.setId(rs.getInt("Id"));
+		obj.setName(rs.getString("Name"));
+		obj.setEmail(rs.getString("Email"));
+		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setBirthDate(rs.getDate("BirthDate"));
+		obj.setDepartment(dep);
+		obj.setDepartment(dep);
+		return obj;
+	}
+
+	private department instantiateDepartment(ResultSet rs) throws SQLException {
+		department dep = new department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName"));
+		return dep;
 	}
 
 	@Override
@@ -80,5 +90,5 @@ public class SellerDaoJDBC implements SellerDao{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 }
